@@ -55,6 +55,24 @@ void Ground::create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint 
   m_N = N;
 }
 
+
+// void surfacePaint(glm::mat4 model){
+//   abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
+
+//   auto const modelViewMatrix{glm::mat3(m_viewMatrix * model)};
+//   auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+//   abcg::glUniformMatrix3fv(m_normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+//   // Set color (checkerboard pattern)
+//   abcg::glUniform4f(m_colorLoc, 0.5f, 0.5f, 0.5f, 1.0f);
+
+//   abcg::glUniform1f(m_KaLoc, m_Ka); 
+//   abcg::glUniform1f(m_KdLoc, m_Kd);
+//   abcg::glUniform1f(m_KsLoc, m_Ks);  
+
+//   abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+// }
+
 void Ground::paint() {
   abcg::glBindVertexArray(m_VAO);
 
@@ -64,7 +82,7 @@ void Ground::paint() {
       // Set model matrix as a translation matrix
       glm::mat4 model{1.0f};
 
-      model = glm::translate(model, glm::vec3(x * m_scale, -0.5f * m_scale, z * m_scale));
+      model = glm::translate(model, glm::vec3(x * m_scale, -0.5f * m_scale, z * m_scale)); // .5 para o ajuste vertical, o bloco inicializa no centro do referencial e possui tamanho m_scale
       model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
 
       abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
@@ -90,7 +108,8 @@ void Ground::paint() {
       // Set model matrix as a translation matrix
       glm::mat4 model{1.0f};
 
-      model = glm::translate(model, glm::vec3(x * m_scale, -(0.5f + 3.0f) * m_scale, z * m_scale));
+      model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1, 0, 0)); //Rotaciona em X
+      model = glm::translate(model, glm::vec3(x * m_scale, (0.5f + 3.0f)* m_scale, z * m_scale)); // ajuste do chão + altura de 3 blocos
       model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
 
       abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
@@ -116,13 +135,41 @@ void Ground::paint() {
       // Set model matrix as a translation matrix
       glm::mat4 model{1.0f};
 
-      // Movendo V2V3 para origem
-      // model = glm::translate(model, glm::vec3( 0.5f * m_scale, -0.5f * m_scale, 0.0f));
       model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0, 0, 1)); //Rotaciona em Z
-      model = glm::translate(model, glm::vec3( -(y+1.0f) * m_scale, 1.5f * m_scale, z * m_scale));
+      model = glm::translate(model, glm::vec3( -(y+1.0f) * m_scale, 1.5f * m_scale, z * m_scale)); 
+      // O sistema de coordenada é referenciado ao objeto, i.e., é alterado com a rotação
+      // Ajuste após rotação, em eixos absolutos:
+      // x :: negativo de m_N / 2 blocos ;  y :: negativo de um bloco
 
-      // model = glm::translate(model, glm::vec3(y * m_scale, 0.0f * m_scale, -z * m_scale));
-      // model = glm::translate(model, glm::vec3(-(3.1+y) * m_scale, 1.6f * m_scale, -z * m_scale));
+      model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
+
+      abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
+
+      auto const modelViewMatrix{glm::mat3(m_viewMatrix * model)};
+      auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+      abcg::glUniformMatrix3fv(m_normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+      // Set color (checkerboard pattern)
+      abcg::glUniform4f(m_colorLoc, 0.5f, 0.5f, 0.5f, 1.0f);
+
+      abcg::glUniform1f(m_KaLoc, m_Ka); 
+      abcg::glUniform1f(m_KdLoc, m_Kd);
+      abcg::glUniform1f(m_KsLoc, m_Ks);  
+
+      abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+  }
+
+  //y,z, +
+  for (auto const z : iter::range(-m_N, m_N + 1)) {
+    for (auto const y : iter::range(0, 2*m_N + 1)) {
+      // Set model matrix as a translation matrix
+      glm::mat4 model{1.0f};
+
+      model = glm::rotate(model, glm::radians(270.0f), glm::vec3(0, 0, 1)); //Rotaciona em Z
+      model = glm::translate(model, glm::vec3( (y+1.0f) * m_scale, 1.5f * m_scale, z * m_scale));
+      // Ajuste após rotação, em eixos absolutos:
+      // x ::  positivo de m_N / 2 blocos ;  y :: negativo de um bloco
 
       model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
 
@@ -144,9 +191,111 @@ void Ground::paint() {
   }
 
 
+  // x,y, 0
+  for (auto const x : iter::range(-m_N, m_N + 1)) {
+    for (auto const y : iter::range(0, 2*m_N + 1)) {
+      // Set model matrix as a translation matrix
+      glm::mat4 model{1.0f};
+
+      model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0)); //Rotaciona em X
+      model = glm::translate(model, glm::vec3( x * m_scale, 1.5f * m_scale, -(y + 1.0f) * m_scale));
+      // Ajuste após rotação, em eixos absolutos:
+      // z ::  negativo de m_N / 2 blocos ; y :: negativo de um bloco
+
+      
+      model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
+
+      abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
+
+      auto const modelViewMatrix{glm::mat3(m_viewMatrix * model)};
+      auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+      abcg::glUniformMatrix3fv(m_normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+      // Set color (checkerboard pattern)
+      abcg::glUniform4f(m_colorLoc, 0.5f, 0.5f, 0.5f, 1.0f);
+
+      abcg::glUniform1f(m_KaLoc, m_Ka); 
+      abcg::glUniform1f(m_KdLoc, m_Kd);
+      abcg::glUniform1f(m_KsLoc, m_Ks);  
+
+      abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+  }
+
+
+  // x,y, +
+  for (auto const x : iter::range(-m_N, m_N + 1)) {
+    for (auto const y : iter::range(0, 2*m_N + 1)) {
+      // Set model matrix as a translation matrix
+      glm::mat4 model{1.0f};
+
+      model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0)); //Rotaciona em X
+      model = glm::translate(model, glm::vec3( x * m_scale, 1.5f * m_scale, (y + 1.0f) * m_scale));
+      // Ajuste após rotação, em eixos absolutos:
+      // z ::  positivo de m_N / 2 blocos ; y :: negativo de um bloco
+      
+      model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
+
+      abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
+
+      auto const modelViewMatrix{glm::mat3(m_viewMatrix * model)};
+      auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+      abcg::glUniformMatrix3fv(m_normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+      // Set color (checkerboard pattern)
+      abcg::glUniform4f(m_colorLoc, 0.5f, 0.5f, 0.5f, 1.0f);
+
+      abcg::glUniform1f(m_KaLoc, m_Ka); 
+      abcg::glUniform1f(m_KdLoc, m_Kd);
+      abcg::glUniform1f(m_KsLoc, m_Ks);  
+
+      abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+  }
 
   abcg::glBindVertexArray(0);
 }
+
+
+// void Ground::drawTile(float angle, float xOffset, float yOffset, float zOffset) {
+//     for (auto const z : iter::range(-m_N, m_N + 1)) {
+//         for (auto const x : iter::range(-m_N, m_N + 1)) {
+//             glm::mat4 model{1.0f};
+
+//             model = glm::rotate(model, glm::radians(angle), glm::vec3(1, 0, 0));
+//             model = glm::translate(model, glm::vec3(x * m_scale + xOffset, y * m_scale + yOffset, z * m_scale + zOffset));
+//             model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
+
+//             abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
+
+//             auto const modelViewMatrix{glm::mat3(m_viewMatrix * model)};
+//             auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+//             abcg::glUniformMatrix3fv(m_normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+//             abcg::glUniform4f(m_colorLoc, 0.5f, 0.5f, 0.5f, 1.0f);
+
+//             abcg::glUniform1f(m_KaLoc, m_Ka); 
+//             abcg::glUniform1f(m_KdLoc, m_Kd);
+//             abcg::glUniform1f(m_KsLoc, m_Ks);  
+
+//             abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+//         }
+//     }
+// }
+
+// void Ground::paint() {
+//     abcg::glBindVertexArray(m_VAO);
+
+//     drawTile(0.0f, 0.0f, -0.5f * m_scale, 0.0f);  // x,z, -
+//     drawTile(180.0f, 0.0f, 1.5f * m_scale, 0.0f); // x,z, +
+//     drawTile(90.0f, -(m_N + 1.0f) * m_scale, 1.5f * m_scale, 0.0f);  // y,z, 0
+//     drawTile(270.0f, (m_N + 1.0f) * m_scale, 1.5f * m_scale, 0.0f);   // y,z, +
+//     drawTile(-90.0f, 0.0f, 1.5f * m_scale, -(m_N + 1.0f) * m_scale);  // x,y, 0
+//     drawTile(90.0f, 0.0f, 1.5f * m_scale, (m_N + 1.0f) * m_scale);    // x,y, +
+  
+//     abcg::glBindVertexArray(0);
+// }
+
 
 void Ground::destroy() {
   abcg::glDeleteBuffers(1, &m_VBO);
