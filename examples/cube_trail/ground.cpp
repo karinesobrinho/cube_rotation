@@ -2,10 +2,10 @@
 
 void Ground::create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint normalMatrixLoc, glm::mat4 viewMatrix, float scale, int N) {
   // Unit quad on the xz plane
-  m_vertices = {{ {.position = {+0.5f, 0.0f, -0.5f}, .normal {0.0f, 1.0f, 0.0f}},
-                  {.position = {-0.5f, 0.0f, -0.5f}, .normal {0.0f, 1.0f, 0.0f}},
-                  {.position = {+0.5f, 0.0f, +0.5f}, .normal {0.0f, 1.0f, 0.0f}},
-                  {.position = {-0.5f, 0.0f, +0.5f}, .normal {0.0f, 1.0f, 0.0f}}
+  m_vertices = {{ {.position = {+0.5f, 0.0f, -0.5f}, .normal {0.0f, 1.0f, 0.0f}}, // V1
+                  {.position = {-0.5f, 0.0f, -0.5f}, .normal {0.0f, 1.0f, 0.0f}}, // V2
+                  {.position = {+0.5f, 0.0f, +0.5f}, .normal {0.0f, 1.0f, 0.0f}}, // V3
+                  {.position = {-0.5f, 0.0f, +0.5f}, .normal {0.0f, 1.0f, 0.0f}}  // V4
                 }};
 
   // VBO
@@ -58,14 +58,13 @@ void Ground::create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint 
 void Ground::paint() {
   abcg::glBindVertexArray(m_VAO);
 
-  // Draw a grid of 2N+1 x 2N+1 tiles on the xz plane, centered around the
-  // origin
+  //  grid 2N+1 x 2N+1 tiles on the xz plane, centered around the origin
   for (auto const z : iter::range(-m_N, m_N + 1)) {
     for (auto const x : iter::range(-m_N, m_N + 1)) {
       // Set model matrix as a translation matrix
       glm::mat4 model{1.0f};
 
-      model = glm::translate(model, glm::vec3(x * m_scale, -0.1f, z * m_scale));
+      model = glm::translate(model, glm::vec3(x * m_scale, -0.5f * m_scale, z * m_scale));
       model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
 
       abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
@@ -84,6 +83,67 @@ void Ground::paint() {
       abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
   }
+  
+  // x,z, -
+  for (auto const z : iter::range(-m_N, m_N + 1)) {
+    for (auto const x : iter::range(-m_N, m_N + 1)) {
+      // Set model matrix as a translation matrix
+      glm::mat4 model{1.0f};
+
+      model = glm::translate(model, glm::vec3(x * m_scale, -(0.5f + 3.0f) * m_scale, z * m_scale));
+      model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
+
+      abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
+
+      auto const modelViewMatrix{glm::mat3(m_viewMatrix * model)};
+      auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+      abcg::glUniformMatrix3fv(m_normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+      // Set color (checkerboard pattern)
+      abcg::glUniform4f(m_colorLoc, 0.5f, 0.5f, 0.5f, 1.0f);
+
+      abcg::glUniform1f(m_KaLoc, m_Ka); 
+      abcg::glUniform1f(m_KdLoc, m_Kd);
+      abcg::glUniform1f(m_KsLoc, m_Ks);  
+
+      abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+  }
+
+  //y,z, 0
+  for (auto const z : iter::range(-m_N, m_N + 1)) {
+    for (auto const y : iter::range(0, 2*m_N + 1)) {
+      // Set model matrix as a translation matrix
+      glm::mat4 model{1.0f};
+
+      // Movendo V2V3 para origem
+      // model = glm::translate(model, glm::vec3( 0.5f * m_scale, -0.5f * m_scale, 0.0f));
+      model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0, 0, 1)); //Rotaciona em Z
+      model = glm::translate(model, glm::vec3( -(y+1.0f) * m_scale, 1.5f * m_scale, z * m_scale));
+
+      // model = glm::translate(model, glm::vec3(y * m_scale, 0.0f * m_scale, -z * m_scale));
+      // model = glm::translate(model, glm::vec3(-(3.1+y) * m_scale, 1.6f * m_scale, -z * m_scale));
+
+      model = glm::scale(model, glm::vec3(m_scale, m_scale, m_scale));
+
+      abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
+
+      auto const modelViewMatrix{glm::mat3(m_viewMatrix * model)};
+      auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+      abcg::glUniformMatrix3fv(m_normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+      // Set color (checkerboard pattern)
+      abcg::glUniform4f(m_colorLoc, 0.5f, 0.5f, 0.5f, 1.0f);
+
+      abcg::glUniform1f(m_KaLoc, m_Ka); 
+      abcg::glUniform1f(m_KdLoc, m_Kd);
+      abcg::glUniform1f(m_KsLoc, m_Ks);  
+
+      abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+  }
+
+
 
   abcg::glBindVertexArray(0);
 }
