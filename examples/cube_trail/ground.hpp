@@ -7,6 +7,7 @@
 class Ground {
 public:
   void create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint normalMatrixLoc, glm::mat4 viewMatrix, float scale, int N);
+  void drawTile(float, glm::vec3, float, float, float, float, float,float);
   void paint();
   void destroy();
 
