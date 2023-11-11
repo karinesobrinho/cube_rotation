@@ -13,7 +13,7 @@ public:
 private:
   std::vector<Vertex> m_vertices;
   float m_scale;
-  int m_N{5}; //Configure number of tiles on the grid of 2N+1 x 2N+1 tiles
+  int m_N; //Configure number of tiles on the grid of 2N+1 x 2N+1 tiles
   GLuint m_VAO{};
   GLuint m_VBO{};
 

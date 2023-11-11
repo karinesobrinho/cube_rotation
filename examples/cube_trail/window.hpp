@@ -44,7 +44,7 @@ private:
 
   glm::ivec2 m_viewportSize{600, 600};
   float m_scale{0.2f};
-  int m_N{5}; //Configure number of tiles on the grid of 2N+1 x 2N+1 tiles
+  int m_N{1}; //Número de tiles do chão, 2N+1 x 2N+1
 
   GLint m_modelMatrixLoc{};
   glm::mat4 m_viewMatrix{1.0f};
