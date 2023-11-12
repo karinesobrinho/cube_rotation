@@ -6,7 +6,8 @@
 
 class Ground {
 public:
-  void create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint normalMatrixLoc, glm::mat4 viewMatrix, float scale, int N);
+  // void create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint normalMatrixLoc, glm::mat4 viewMatrix, float scale, int N);
+  void create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, glm::mat4 viewMatrix, float scale, int N);
   void drawTile(float, glm::vec3, float, float, float, float, float,float);
   void paint();
   void destroy();
@@ -19,20 +20,20 @@ private:
   GLuint m_VBO{};
 
   GLint m_modelMatrixLoc{};
-  GLint m_normalMatrixLoc;
+  // GLint m_normalMatrixLoc;
   GLint m_colorLoc{};
 
   glm::mat4 m_viewMatrix;
 
 
-  //Material Light properties
-  GLint m_KaLoc;
-  GLint m_KdLoc;
-  GLint m_KsLoc;
+  // //Material Light properties
+  // GLint m_KaLoc;
+  // GLint m_KdLoc;
+  // GLint m_KsLoc;
 
-  float m_Ka{0.7};
-  float m_Kd{0.3};
-  float m_Ks{0.1};
+  // float m_Ka{0.7};
+  // float m_Kd{0.3};
+  // float m_Ks{0.1};
 
 
 };
