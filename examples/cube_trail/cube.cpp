@@ -1,7 +1,8 @@
 #include "cube.hpp"
+#include <iostream>
 
-#include <unordered_map>
 #include <glm/gtx/fast_trigonometry.hpp>
+#include <unordered_map>
 
 // Explicit specialization of std::hash for Vertex
 template <> struct std::hash<Vertex> {
@@ -141,19 +142,20 @@ void Cube::paint() {
   // Set uniform variables for the cube
   m_positionMatrix = glm::translate(glm::mat4{1.0f}, m_position);
   m_modelMatrix = m_positionMatrix * m_animationMatrix;
-  m_modelMatrix = glm::scale(m_modelMatrix, glm::vec3(m_scale, m_scale, m_scale));
+  m_modelMatrix =
+      glm::scale(m_modelMatrix, glm::vec3(m_scale, m_scale, m_scale));
   abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &m_modelMatrix[0][0]);
   abcg::glUniform4f(m_colorLoc, 1.0f, 0.0f, 1.0f, 1.0f); // RED | purple
 
-  abcg::glUniform1f(m_KaLoc, m_Ka); 
+  abcg::glUniform1f(m_KaLoc, m_Ka);
   abcg::glUniform1f(m_KdLoc, m_Kd);
-  abcg::glUniform1f(m_KsLoc, m_Ks);  
+  abcg::glUniform1f(m_KsLoc, m_Ks);
 
   auto const modelViewMatrix{glm::mat3(m_viewMatrix * m_modelMatrix)};
   auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
   abcg::glUniformMatrix3fv(m_normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
 
-  //SET uniform variables here
+  // SET uniform variables here
   abcg::glBindVertexArray(m_VAO);
 
   abcg::glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_INT, nullptr);
@@ -161,7 +163,9 @@ void Cube::paint() {
   abcg::glBindVertexArray(0);
 }
 
-void Cube::create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint normalMatrixLoc, glm::mat4 viewMatrix, float scale, int N) {
+void Cube::create(GLuint program, GLint modelMatrixLoc, GLint colorLoc,
+                  GLint normalMatrixLoc, glm::mat4 viewMatrix, float scale,
+                  int N) {
   // Release previous VAO
   abcg::glDeleteVertexArrays(1, &m_VAO);
 
@@ -199,7 +203,6 @@ void Cube::create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint no
   m_KdLoc = abcg::glGetUniformLocation(program, "Kd");
   m_KsLoc = abcg::glGetUniformLocation(program, "Ks");
 
-
   m_modelMatrixLoc = modelMatrixLoc;
   m_normalMatrixLoc = normalMatrixLoc;
   m_viewMatrix = viewMatrix;
@@ -208,10 +211,7 @@ void Cube::create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint no
   m_maxPos = m_scale * N;
 }
 
-void Cube::update(float deltaTime) {
-  move(deltaTime);
-}
-
+void Cube::update(float deltaTime) { move(deltaTime); }
 
 void Cube::destroy() const {
   abcg::glDeleteBuffers(1, &m_EBO);
@@ -219,18 +219,39 @@ void Cube::destroy() const {
   abcg::glDeleteVertexArrays(1, &m_VAO);
 }
 
-
 void Cube::move(float deltaTime) {
-  if (!m_isMoving) return;
-  if (m_angle >= 0.0f && m_angle < 90.0f) { //Angle in [0, 90) continue moving
-    increaseAngle(deltaTime * m_angleVelocity);
-    m_animationMatrix = glm::rotate(glm::mat4{1.0f}, glm::radians(gsl::narrow_cast<int>(m_orientation) * 90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); //ROTATE AROUND A DIRECTION
-    m_animationMatrix = glm::translate(m_animationMatrix, glm::vec3(0, -m_scale/2, m_scale/2)); //PUT ON ORIGIN
-    m_animationMatrix = glm::rotate(m_animationMatrix, glm::radians(m_angle), glm::vec3(1.0f, 0.0f, 0.0f)); //ROTATE AROUND X axis
-    m_animationMatrix = glm::translate(m_animationMatrix, glm::vec3(0, m_scale/2, -m_scale/2));//TRANSLATTE TO MATCH X axis
-  } else if (m_angle >= 90.0f) { //Angle in [90, +infinity) finish moviment
-    resetAnimation(); 
+  if (!m_isMoving)
+    return;
+  float max_angle = m_border ? 180.0 : 90.0f;
+
+  if (m_angle >= 0.0f &&
+      m_angle < max_angle) { // Angle in [0, max_angle) continue moving
+    // Exclusivo para realizar a animação de rotação, não a translação
+    // increaseAngle(deltaTime * m_angleVelocity);
+    m_angle += deltaTime * m_angleVelocity;
+    m_animationMatrix =
+        glm::rotate(glm::mat4{1.0f},
+                    glm::radians(gsl::narrow_cast<int>(m_orientation) * 90.0f),
+                    glm::vec3(0.0f, 1.0f, 0.0f)); // ROTATE AROUND A DIRECTION
+    m_animationMatrix = glm::translate(
+        m_animationMatrix,
+        glm::vec3(0, -m_scale / 2, m_scale / 2)); // PUT ON ORIGIN
+    m_animationMatrix =
+        glm::rotate(m_animationMatrix, glm::radians(m_angle),
+                    glm::vec3(1.0f, 0.0f, 0.0f)); // ROTATE AROUND X axis
+    m_animationMatrix = glm::translate(
+        m_animationMatrix,
+        glm::vec3(0, m_scale / 2, -m_scale / 2)); // TRANSLATE TO MATCH X axis
+
+    // std::cout << "gsl::narrow_cast<int>(m_orientation) is: " <<
+    // gsl::narrow_cast<int>(m_orientation) << std::endl; std::cout <<
+    // "max_angle is: " << max_angle << std::endl; std::cout << "m_angle is: "
+    // << m_angle << std::endl; std::cout << "x,y,z is: " << m_position.x << " "
+    // << m_position.y << " " << m_position.z << std::endl;
+
+  } else if (m_angle >= max_angle) { // Angle in [max_angle, +infinity) finish moviment
     translate();
+    resetAnimation();
   }
 }
 
@@ -238,50 +259,181 @@ void Cube::resetAnimation() {
   m_animationMatrix = glm::mat4{1.0f};
   m_angle = 0.0f;
   m_isMoving = false;
+  m_border = false;
 }
 
 void Cube::translate() {
-  switch (m_orientation) {
+  // switch (m_orientation) {
+  //   case Orientation::DOWN:
+  //     m_position.z += m_scale;
+  //     // if(m_border){
+  //     //   if(m_planeface == PlaneFace::C_UPPER) {
+  //     //     m_position.y -= m_scale;
+  //     //     m_planeface = PlaneFace::C_FRONT;
+  //     //   }
+  //     // }
+  //     break;
+  //   case Orientation::UP:
+  //     m_position.z -= m_scale;
+  //     break;
+  //   case Orientation::LEFT:
+  //     m_position.x -= m_scale;
+  //     break;
+  //   case Orientation::RIGHT:
+  //     m_position.x += m_scale;
+  //     break;
+  // }
+
+  // TODO
+  switch (m_planeface) {
+  case PlaneFace::C_UPPER:
+    switch (m_orientation) {
     case Orientation::DOWN:
       m_position.z += m_scale;
+      if (m_border) {
+        m_position.y -= m_scale;
+        m_planeface = PlaneFace::C_FRONT;
+      }
       break;
     case Orientation::UP:
       m_position.z -= m_scale;
+      if (m_border) {
+        m_position.y -= m_scale;
+        m_planeface = PlaneFace::C_REAR;
+      }
       break;
     case Orientation::LEFT:
       m_position.x -= m_scale;
       break;
     case Orientation::RIGHT:
       m_position.x += m_scale;
+      if (m_border) {
+        m_position.y -= m_scale;
+        m_planeface = PlaneFace::C_RIGHT;
+      }
       break;
+    }
+    break;
+
+  case PlaneFace::C_FRONT:
+    switch (m_orientation) {
+    case Orientation::DOWN:
+      m_position.y -= m_scale;
+      // if(m_border){
+      //   m_position.y -= m_scale;
+      //   m_planeface = PlaneFace::C_FRONT;
+      // }
+      break;
+    case Orientation::UP:
+      m_position.y += m_scale;
+      if (m_border) {
+        // m_position.y += m_scale;
+        m_planeface = PlaneFace::C_FRONT;
+      }
+      break;
+    case Orientation::LEFT:
+      m_position.x -= m_scale;
+      break;
+    case Orientation::RIGHT:
+      m_position.x += m_scale;
+      // if(m_border){
+      //   m_position.y -= m_scale;
+      //   m_planeface = PlaneFace::C_RIGHT;
+      // }
+      break;
+    }
+    break;
   }
 }
 
 void Cube::moveDown() {
-  if (m_isMoving || m_position.z + m_scale > m_maxPos) return;
+  std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
+            << m_position.z << " " << std::endl;
+  std::cout << "m_scale: " << m_scale << std::endl;
+  std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
+  std::cout << "m_border: " << m_border << std::endl;
+  std::cout << "\n" << std::endl;
+
+  // if (m_isMoving || m_position.z + m_scale > m_maxPos) return;
+  if (m_isMoving)
+    return;
+  else {
+    switch (m_planeface) {
+    case PlaneFace::C_UPPER:
+      if (m_position.z + m_scale > m_maxPos)
+        m_border = true;
+      break;
+    case PlaneFace::C_FRONT:
+      if (m_position.y + m_scale < -m_maxPos)
+        m_border = true;
+      break;
+    }
+  }
+
   m_isMoving = true;
   m_orientation = Orientation::DOWN;
 }
 
 void Cube::moveUp() {
-  if (m_isMoving || m_position.z - m_scale < -m_maxPos) return;
+  std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
+            << m_position.z << " " << std::endl;
+  std::cout << "m_scale: " << m_scale << std::endl;
+  std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
+  std::cout << "m_border: " << m_border << std::endl;
+  std::cout << "\n" << std::endl;
+
+  // if (m_isMoving || m_position.z - m_scale < -m_maxPos) return;
+  // if (m_position.z - m_scale > m_maxPos) {
+  //   m_border = true;
+  if (m_isMoving)
+    return;
+  else {
+    switch (m_planeface) {
+    case PlaneFace::C_UPPER:
+      if (m_position.z - m_scale > m_maxPos)
+        m_border = true;
+      break;
+    case PlaneFace::C_FRONT:
+      if (m_position.y + m_scale < -m_maxPos)
+        m_border = true;
+      break;
+    }
+  }
   m_isMoving = true;
   m_orientation = Orientation::UP;
 }
 
 void Cube::moveLeft() {
-  if (m_isMoving || m_position.x - m_scale < -m_maxPos) return;
+  std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
+            << m_position.z << " " << std::endl;
+  std::cout << "m_scale: " << m_scale << std::endl;
+  std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
+  std::cout << "m_border: " << m_border << std::endl;
+  std::cout << "\n" << std::endl;
+
+  if (m_isMoving || m_position.x - m_scale < -m_maxPos)
+    return;
   m_isMoving = true;
   m_orientation = Orientation::LEFT;
 }
 
 void Cube::moveRigth() {
-  if (m_isMoving || m_position.x + m_scale > m_maxPos) return; 
+  std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
+            << m_position.z << " " << std::endl;
+  std::cout << "m_scale: " << m_scale << std::endl;
+  std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
+  std::cout << "m_border: " << m_border << std::endl;
+  std::cout << "\n" << std::endl;
+
+  // std::cout << "m_maxPos: " << m_maxPos << std::endl;
+
+  if (m_isMoving || m_position.x + m_scale > m_maxPos)
+    return;
   m_isMoving = true;
   m_orientation = Orientation::RIGHT;
 }
 
-void Cube::increaseAngle(float inc) {
-  m_angle += inc;
-  m_angle = m_angle <= 90.0f ? m_angle : 90.0f;
-}
+// void Cube::increaseAngle(float inc) {
+//   m_angle += inc;
+//   m_angle = m_angle <= 90.0f ? m_angle : 90.0f;
+// }

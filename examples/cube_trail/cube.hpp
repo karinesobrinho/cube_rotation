@@ -38,7 +38,6 @@ private:
   float m_Kd{0.3};
   float m_Ks{0.1};
 
-
   GLint m_colorLoc;
 
   std::vector<Vertex> m_vertices;
@@ -46,15 +45,19 @@ private:
 
   void createBuffers();
 
-  enum class Orientation{ DOWN, RIGHT, UP, LEFT};
+  enum class Orientation{ DOWN, RIGHT, UP, LEFT}; // 0,1,2,3
+  enum class PlaneFace{ C_UPPER, C_FRONT, C_BELOW, C_REAR, C_RIGHT, C_LEFT}; // 0,1,2,3,4,5
 
   glm::vec3 m_position{};
   float m_scale{1.0f};
   float m_angle{};
   Orientation m_orientation{Orientation::DOWN};
+  PlaneFace m_planeface{PlaneFace::C_UPPER};
+
   bool m_isMoving{false};
   float m_maxPos{1.0f};
   float m_angleVelocity{360.0f}; //animation to move takes 1/4 of a second
+  bool m_border{false};
 
   void move(float deltaTime);
   void translate();
