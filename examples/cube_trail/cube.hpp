@@ -12,7 +12,7 @@ public:
   void create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint normalMatrixLoc, glm::mat4 viewMatrix, float scale, int N);
   void destroy() const;
   void moveLeft();
-  void moveRigth();
+  void moveRight();
   void moveUp();
   void moveDown();
 
@@ -46,7 +46,7 @@ private:
   void createBuffers();
 
   enum class Orientation{ DOWN, RIGHT, UP, LEFT}; // 0,1,2,3
-  enum class PlaneFace{ C_UPPER, C_FRONT, C_BELOW, C_REAR, C_RIGHT, C_LEFT}; // 0,1,2,3,4,5
+  enum class PlaneFace{ C_UPPER, C_FRONT, C_BOTTOM, C_REAR, C_RIGHT, C_LEFT}; // 0,1,2,3,4,5
 
   glm::vec3 m_position{};
   float m_scale{1.0f};

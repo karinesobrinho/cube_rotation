@@ -17,7 +17,7 @@ void Window::onEvent(SDL_Event const &event) {
       m_cube.moveLeft();
     
     if (event.key.keysym.sym == SDLK_d || event.key.keysym.sym == SDLK_RIGHT) 
-      m_cube.moveRigth();
+      m_cube.moveRight();
     
   }
 }
