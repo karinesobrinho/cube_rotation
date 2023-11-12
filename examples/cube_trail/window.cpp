@@ -35,11 +35,6 @@ void Window::onCreate() {
   m_projMatrixLoc = abcg::glGetUniformLocation(m_program, "projMatrix");
   m_modelMatrixLoc = abcg::glGetUniformLocation(m_program, "modelMatrix");
   m_colorLoc = abcg::glGetUniformLocation(m_program, "color");
-  // m_normalMatrixLoc = abcg::glGetUniformLocation(m_program, "normalMatrix");
-  // m_lightPositionLoc = abcg::glGetUniformLocation(m_program,
-  // "lightPosition"); m_IaLoc = abcg::glGetUniformLocation(m_program, "Ia");
-  // m_IdLoc = abcg::glGetUniformLocation(m_program, "Id");
-  // m_IsLoc = abcg::glGetUniformLocation(m_program, "Is");
 
   m_ground.create(m_program, m_modelMatrixLoc, m_colorLoc, m_viewMatrix,
                   m_scale, m_N);
@@ -53,10 +48,9 @@ void Window::onUpdate() {
 }
 
 void Window::onPaint() {
+
   abcg::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
   abcg::glViewport(0, 0, m_viewportSize.x, m_viewportSize.y);
-
   abcg::glUseProgram(m_program);
 
   // Set uniform variables that have the same value for every model
@@ -67,9 +61,6 @@ void Window::onPaint() {
 
   abcg::glUniformMatrix4fv(m_viewMatrixLoc, 1, GL_FALSE, &m_viewMatrix[0][0]);
   abcg::glUniformMatrix4fv(m_projMatrixLoc, 1, GL_FALSE, &m_projMatrix[0][0]);
-  // abcg::glUniform3f(m_lightPositionLoc, m_lightPos.x, m_lightPos.y,
-  // m_lightPos.z); abcg::glUniform1f(m_IaLoc, m_Ia); abcg::glUniform1f(m_IdLoc,
-  // m_Id); abcg::glUniform1f(m_IsLoc, m_Is);
 
   m_cube.paint();
   m_ground.paint();

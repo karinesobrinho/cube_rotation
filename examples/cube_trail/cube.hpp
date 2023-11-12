@@ -10,7 +10,6 @@ public:
   void paint();
   void update(float deltaTime);
   void create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, glm::mat4 viewMatrix, float scale, int N);
-  // void create(GLuint program, GLint modelMatrixLoc, GLint colorLoc, GLint normalMatrixLoc, glm::mat4 viewMatrix, float scale, int N);
   void destroy() const;
   void moveLeft();
   void moveRight();
@@ -27,17 +26,7 @@ private:
   glm::mat4 m_viewMatrix;
   glm::mat4 m_positionMatrix{1.0f};
   glm::mat4 m_modelMatrix{1.0f};
-  // GLint m_normalMatrixLoc;
   GLint m_modelMatrixLoc;
-
-  //Material Light properties
-  // GLint m_KaLoc;
-  // GLint m_KdLoc;
-  // GLint m_KsLoc;
-
-  // float m_Ka{0.7};
-  // float m_Kd{0.3};
-  // float m_Ks{0.1};
 
   GLint m_colorLoc;
 
@@ -64,10 +53,6 @@ private:
   void translate();
   void resetAnimation();
   void increaseAngle(float inc);
-
-  // bool m_hasNormals{false};
-
-  // void computeNormals();
 
 };
 
