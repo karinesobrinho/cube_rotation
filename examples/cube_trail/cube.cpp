@@ -99,8 +99,8 @@ void Cube::paint() {
   abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &m_modelMatrix[0][0]);
   abcg::glUniform4f(m_colorLoc, 0.36f, 0.26f, 0.56f, 0.8f); // RED | purple
 
-  auto const modelViewMatrix{glm::mat3(m_viewMatrix * m_modelMatrix)};
-  auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+  // auto const modelViewMatrix{glm::mat3(m_viewMatrix * m_modelMatrix)};
+  // auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
 
   // SET uniform variables here
   abcg::glBindVertexArray(m_VAO);

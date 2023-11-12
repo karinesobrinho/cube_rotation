@@ -60,9 +60,8 @@ void Ground::drawTile(float angle, glm::vec3 axis, float xOffset, float yOffset,
 
       abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
 
-      auto const modelViewMatrix{glm::mat3(m_viewMatrix * model)};
-      auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
-
+      // auto const modelViewMatrix{glm::mat3(m_viewMatrix * model)};
+      // auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
 
       abcg::glUniform4f(m_colorLoc, 0.5f, 0.5f, 0.5f, 1.0f);
       abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
