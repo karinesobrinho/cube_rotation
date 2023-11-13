@@ -99,9 +99,6 @@ void Cube::paint() {
   abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &m_modelMatrix[0][0]);
   abcg::glUniform4f(m_colorLoc, 0.36f, 0.26f, 0.56f, 0.8f); // RED | purple
 
-  // auto const modelViewMatrix{glm::mat3(m_viewMatrix * m_modelMatrix)};
-  // auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
-
   // SET uniform variables here
   abcg::glBindVertexArray(m_VAO);
 
@@ -137,12 +134,7 @@ void Cube::create(GLuint program, GLint modelMatrixLoc, GLint colorLoc,
   abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
   abcg::glBindVertexArray(0);
 
-  // m_KaLoc = abcg::glGetUniformLocation(program, "Ka");
-  // m_KdLoc = abcg::glGetUniformLocation(program, "Kd");
-  // m_KsLoc = abcg::glGetUniformLocation(program, "Ks");
-
   m_modelMatrixLoc = modelMatrixLoc;
-  // m_normalMatrixLoc = normalMatrixLoc;
   m_viewMatrix = viewMatrix;
   m_colorLoc = colorLoc;
   m_scale = scale;
@@ -167,19 +159,29 @@ void Cube::move(float deltaTime) {
     // Exclusivo para realizar a animação de rotação, não a translação
     // increaseAngle(deltaTime * m_angleVelocity);
     m_angle += deltaTime * m_angleVelocity;
-    m_animationMatrix =
-        glm::rotate(glm::mat4{1.0f},
-                    glm::radians(gsl::narrow_cast<int>(m_orientation) * 90.0f),
-                    glm::vec3(0.0f, 1.0f, 0.0f)); // ROTATE AROUND A DIRECTION
-    m_animationMatrix = glm::translate(
-        m_animationMatrix,
-        glm::vec3(0, -m_scale / 2, m_scale / 2)); // PUT ON ORIGIN
-    m_animationMatrix =
-        glm::rotate(m_animationMatrix, glm::radians(m_angle),
-                    glm::vec3(1.0f, 0.0f, 0.0f)); // ROTATE AROUND X axis
-    m_animationMatrix = glm::translate(
-        m_animationMatrix,
-        glm::vec3(0, m_scale / 2, -m_scale / 2)); // TRANSLATE TO MATCH X axis
+    // DOWN 0 
+    // RIGHT 90
+    // UP  180
+    // LEFT 270
+
+    if(m_planeface == PlaneFace::C_FRONT) {
+      m_animationMatrix = glm::rotate(glm::mat4{1.0f}, glm::radians(gsl::narrow_cast<int>(m_orientation) * 90.0f), glm::vec3(0.0f, 0.0f, 1.0f)); // ROTATE AROUND A DIRECTION
+      m_animationMatrix = glm::translate( m_animationMatrix, glm::vec3(0, -m_scale / 2 , -m_scale / 2)); // PUT ON ORIGIN
+      m_animationMatrix = glm::rotate(m_animationMatrix, glm::radians(m_angle), glm::vec3(1.0f, 0.0f, 0.0f)); // Após a rotação executada na linha acima, o sentido anti-horário do eixo x deve apontar para a direção q ocorre o translado
+      m_animationMatrix = glm::translate(m_animationMatrix, glm::vec3(0, +m_scale / 2 , m_scale / 2)); // TRANSLATE TO MATCH X axis
+    }
+    else if(m_planeface == PlaneFace::C_RIGHT) {
+      m_animationMatrix = glm::rotate(glm::mat4{1.0f}, glm::radians(gsl::narrow_cast<int>(m_orientation) * 90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // ROTATE AROUND A DIRECTION
+      m_animationMatrix = glm::translate( m_animationMatrix, glm::vec3(+m_scale / 2, -m_scale / 2, 0)); // PUT ON ORIGIN
+      m_animationMatrix = glm::rotate(m_animationMatrix, glm::radians(-m_angle), glm::vec3(0.0f, 0.0f, 1.0f)); // Após a rotação executada na linha acima, o sentido anti-horário do eixo x deve apontar para a direção q ocorre o translado
+      m_animationMatrix = glm::translate(m_animationMatrix, glm::vec3( -m_scale / 2, m_scale / 2, 0)); // TRANSLATE TO MATCH X axis
+    }
+    else{
+      m_animationMatrix = glm::rotate(glm::mat4{1.0f}, glm::radians(gsl::narrow_cast<int>(m_orientation) * 90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // ROTATE AROUND A DIRECTION
+      m_animationMatrix = glm::translate( m_animationMatrix, glm::vec3(0, -m_scale / 2, m_scale / 2)); // PUT ON ORIGIN
+      m_animationMatrix = glm::rotate(m_animationMatrix, glm::radians(m_angle), glm::vec3(1.0f, 0.0f, 0.0f)); // Após a rotação executada na linha 166, o eixo x deve apontar para a direção q ocorre o translado
+      m_animationMatrix = glm::translate(m_animationMatrix, glm::vec3(0, m_scale / 2, -m_scale / 2)); // TRANSLATE TO MATCH X axis
+    }
 
     // std::cout << "gsl::narrow_cast<int>(m_orientation) is: " <<
     // gsl::narrow_cast<int>(m_orientation) << std::endl; std::cout <<
@@ -420,13 +422,13 @@ void Cube::translate() {
 }
 
 void Cube::moveDown() {
-  std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
-            << m_position.z << " " << std::endl;
-  std::cout << "m_scale: " << m_scale << std::endl;
-  std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
-  std::cout << "m_border: " << m_border << std::endl;
-  std::cout << "-(3 * m_maxPos): " << -(3 * m_maxPos) << std::endl;
-  std::cout << "\n" << std::endl;
+  // std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
+  //           << m_position.z << " " << std::endl;
+  // std::cout << "m_scale: " << m_scale << std::endl;
+  // std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
+  // std::cout << "m_border: " << m_border << std::endl;
+  // std::cout << "-(3 * m_maxPos): " << -(3 * m_maxPos) << std::endl;
+  // std::cout << "\n" << std::endl;
 
   if (m_isMoving)
     return;
@@ -468,12 +470,12 @@ void Cube::moveDown() {
 }
 
 void Cube::moveUp() {
-  std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
-            << m_position.z << " " << std::endl;
-  std::cout << "m_scale: " << m_scale << std::endl;
-  std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
-  std::cout << "m_border: " << m_border << std::endl;
-  std::cout << "\n" << std::endl;
+  // std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
+  //           << m_position.z << " " << std::endl;
+  // std::cout << "m_scale: " << m_scale << std::endl;
+  // std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
+  // std::cout << "m_border: " << m_border << std::endl;
+  // std::cout << "\n" << std::endl;
 
   if (m_isMoving)
     return;
@@ -512,12 +514,12 @@ void Cube::moveUp() {
 }
 
 void Cube::moveLeft() {
-  std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
-            << m_position.z << " " << std::endl;
-  std::cout << "m_scale: " << m_scale << std::endl;
-  std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
-  std::cout << "m_border: " << m_border << std::endl;
-  std::cout << "\n" << std::endl;
+  // std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
+  //           << m_position.z << " " << std::endl;
+  // std::cout << "m_scale: " << m_scale << std::endl;
+  // std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
+  // std::cout << "m_border: " << m_border << std::endl;
+  // std::cout << "\n" << std::endl;
 
   if (m_isMoving)
     return;
@@ -556,12 +558,12 @@ void Cube::moveLeft() {
 }
 
 void Cube::moveRight() {
-  std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
-            << m_position.z << " " << std::endl;
-  std::cout << "m_scale: " << m_scale << std::endl;
-  std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
-  std::cout << "m_border: " << m_border << std::endl;
-  std::cout << "\n" << std::endl;
+  // std::cout << "x,y,z: " << m_position.x << " " << m_position.y << " "
+  //           << m_position.z << " " << std::endl;
+  // std::cout << "m_scale: " << m_scale << std::endl;
+  // std::cout << "plane: " << gsl::narrow_cast<int>(m_planeface) << std::endl;
+  // std::cout << "m_border: " << m_border << std::endl;
+  // std::cout << "\n" << std::endl;
 
   if (m_isMoving)
     return;
